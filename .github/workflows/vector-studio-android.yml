@@ -1,0 +1,59 @@
+name: Build Vector Studio Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install application dependencies
+        working-directory: src/vector-studio
+        run: npm ci
+
+      - name: Install Capacitor
+        working-directory: src/vector-studio
+        run: npm install --no-save --package-lock=false @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8
+
+      - name: Build Vector Studio
+        working-directory: src/vector-studio
+        run: npm run build
+
+      - name: Create Android project
+        working-directory: src/vector-studio
+        run: npx cap add android
+
+      - name: Synchronize Android project
+        working-directory: src/vector-studio
+        run: npx cap sync android
+
+      - name: Compile APK
+        working-directory: src/vector-studio/android
+        run: chmod +x gradlew && ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vector-Studio-Android
+          path: src/vector-studio/android/app/build/outputs/apk/debug/app-debug.apk
