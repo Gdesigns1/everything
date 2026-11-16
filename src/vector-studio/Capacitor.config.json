@@ -1,0 +1,8 @@
+{
+  "appId": "com.gdesigns1.vectorstudio",
+  "appName": "Vector Studio",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
